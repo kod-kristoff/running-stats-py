@@ -1,0 +1,15 @@
+language: python
+dist: xenial
+sudo: false
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+
+install:
+  - pip install -e .[test]
+script:
+  - pytest -vv --cov=running_stats --cov-report=term tests
+after_success:
+  - codecov
+  - coveralls
