@@ -7,9 +7,9 @@ python:
   - "3.8"
 
 install:
-  - pip install -e .[test]
+  - make install-test
 script:
-  - pytest -vv --cov=running_stats --cov-report=term tests
+  - make test-all
 after_success:
   - codecov
   - coveralls

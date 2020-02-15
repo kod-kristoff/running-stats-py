@@ -28,43 +28,48 @@ jobs:
         # if: steps.cache-pip.outputs.cache-hit != 'true'
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[test]
+          make install-test
       - name: Lint with pylint
         run: |
-          pylint --rcfile=.pylintrc --exit-zero karp5 setup.py run.py cli.py
+          pylint --rcfile=.pylintrc --exit-zero running_stats
+      - name: Typecheck
+        run: |
+          pip install pytype
+          pytype      
       - name: Test with pytest
         run: |
-          pytest -vv --cov=running_stats --cov-report=term tests
+          make test-all
+            #pytest -vv --cov=running_stats --cov-report=term tests
       # - name: Coveralls
       #   uses: coverallsapp/github-action@master
       #   with:
       #     github-token: ${{ secrets.github_token }}
-  publish:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.6
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.6
-      - name: Build distribution
-        run: |
-          pip install --upgrade setuptools twine wheel pbr
-          python setup.py sdist bdist_wheel
-          echo "github.ref = ${{ github.ref }}"
-      - name: Check distributions
-        run: twine check dist/*
-      - name: Publish package to TestPyPI
-        uses: pypa/gh-action-pypi-publish@master
-        if: github.repository == 'kod-kristoff/running-stats-py' && !startsWith(github.ref, 'refs/tags')
-        with:
-          user: __token__
-          password: ${{ secrets.test_pypi_password }}
-          repository_url: https://test.pypi.org/legacy/
-      - name: Publish package to PyPI
-        uses: pypa/gh-action-pypi-publish@master
-        if: github.repository == 'kod-kristoff/running-stats-py' && startsWith(github.ref, 'refs/tags')
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+      #   publish:
+      #     needs: build
+      #     runs-on: ubuntu-latest
+      #     steps:
+      #       - uses: actions/checkout@v1
+      #       - name: Set up Python 3.6
+      #         uses: actions/setup-python@v1
+      #         with:
+      #           python-version: 3.6
+      #       - name: Build distribution
+      #         run: |
+      #           pip install --upgrade setuptools twine wheel pbr
+      #           python setup.py sdist bdist_wheel
+      #           echo "github.ref = ${{ github.ref }}"
+      #       - name: Check distributions
+      #         run: twine check dist/*
+      #       - name: Publish package to TestPyPI
+      #         uses: pypa/gh-action-pypi-publish@master
+      #         if: github.repository == 'kod-kristoff/running-stats-py' && !startsWith(github.ref, 'refs/tags')
+      #         with:
+      #           user: __token__
+      #           password: ${{ secrets.test_pypi_password }}
+      #           repository_url: https://test.pypi.org/legacy/
+      #       - name: Publish package to PyPI
+      #         uses: pypa/gh-action-pypi-publish@master
+      #         if: github.repository == 'kod-kristoff/running-stats-py' && startsWith(github.ref, 'refs/tags')
+      #         with:
+      #           user: __token__
+      #           password: ${{ secrets.pypi_password }}
