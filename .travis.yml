@@ -9,7 +9,7 @@ python:
 install:
   - make install-test
 script:
-  - make test-all
+  - make test-w-coverage
 after_success:
   - codecov
   - coveralls

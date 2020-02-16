@@ -1,4 +1,4 @@
-.PHONY: test clean clean-pyc lint test-w-coverage
+.PHONY: test clean clean-pyc lint lint-no-fail test-w-coverage
 
 .DEFAULT: test
 
@@ -53,8 +53,11 @@ test: install-test clean-pyc
 test-w-coverage: install-test clean-pyc
 	${INVENV} pytest -vv --cov-config=setup.cfg --cov=running_stats --cov-report=term-missing tests
 
-lint: install
+lint: install-test
 	${INVENV} pylint --rcfile .pylintrc running_stats tests
+
+lint-no-fail: install-test
+	${INVENV} pylint --rcfile .pylintrc --exit-zero running_stats tests
 
 clean: clean-pyc
 clean-pyc:

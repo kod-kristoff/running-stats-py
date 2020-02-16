@@ -28,7 +28,7 @@ jobs:
         # if: steps.cache-pip.outputs.cache-hit != 'true'
         run: make install-test
       - name: Lint with pylint
-        run: make lint
+        run: make lint-no-fail
       - name: Typecheck
         run: |
           pip install pytype
