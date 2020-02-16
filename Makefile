@@ -1,4 +1,4 @@
-.PHONY: test clean clean-pyc lint test-all
+.PHONY: test clean clean-pyc lint test-w-coverage
 
 .DEFAULT: test
 
@@ -32,6 +32,7 @@ install-dev: venv install-test ${VENV_NAME}/req-dev.installed
 
 ${VENV_NAME}/made:
 	test -d ${VENV_NAME} || ${PYTHON} -m venv ${VENV_NAME}
+	${INVENV} pip install --upgrade pip
 	@touch $@
 
 ${VENV_NAME}/req.installed: requirements.txt
@@ -49,7 +50,7 @@ ${VENV_NAME}/req-dev.installed: setup.py setup.cfg
 test: install-test clean-pyc
 	${INVENV} pytest -vv tests/
 
-test-all: install-test clean-pyc
+test-w-coverage: install-test clean-pyc
 	${INVENV} pytest -vv --cov-config=setup.cfg --cov=running_stats --cov-report=term-missing tests
 
 lint: install
