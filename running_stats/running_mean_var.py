@@ -2,7 +2,7 @@
 import math
 
 
-class RunningStats:
+class RunningMeanVar:
     """Compute mean and variance.
     """
     def __init__(self):
@@ -37,7 +37,7 @@ class RunningStats:
         return math.sqrt(self.variance())
 
     def __add__(self, other):
-        combined = RunningStats()
+        combined = RunningMeanVar()
         combined.n = self.n + other.n
 
         delta = other.M1 - self.M1
@@ -49,4 +49,4 @@ class RunningStats:
         return combined
 
     def __str__(self):
-        return f"RunningStats(n={self.n}, M1={self.M1}, M2={self.M2})"
+        return f"RunningMeanVar(n={self.n}, M1={self.M1}, M2={self.M2})"

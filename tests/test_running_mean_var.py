@@ -3,12 +3,12 @@ from unittest import mock
 
 import pytest
 
-from running_stats.running_stats import RunningStats
+from running_stats.running_mean_var import RunningMeanVar
 
 
 @pytest.fixture
 def rs_empty():
-    return RunningStats()
+    return RunningMeanVar()
 
 
 @pytest.fixture
@@ -44,7 +44,7 @@ def test_initial_values(rs_empty):
 
 @pytest.mark.parametrize("var", [0.0, 2.0, 4.0, 5.0])
 def test_standard_deviation(var):
-    rs = RunningStats()
+    rs = RunningMeanVar()
     rs.variance = mock.Mock()
     rs.variance.return_value = var
     assert rs.standard_deviation() == math.sqrt(var)
@@ -84,7 +84,7 @@ def test_variance_three_values(rs_three_values):
 
 
 def test_push_iter_with_list(value_list):
-    rs = RunningStats()
+    rs = RunningMeanVar()
     rs.push_iter(value_list)
     assert rs.n == len(value_list)
     assert rs.mean() == -0.25
@@ -92,12 +92,12 @@ def test_push_iter_with_list(value_list):
 
 
 def test_add_two_running_stats():
-    a = RunningStats()
+    a = RunningMeanVar()
     a.n = 3
     a.M1 = 2.0
     a.M2 = 7.8
 
-    b = RunningStats()
+    b = RunningMeanVar()
     b.n = 6
     b.M1 = 6.0
     b.M2 = 3.4
@@ -109,12 +109,12 @@ def test_add_two_running_stats():
 
 
 def test_iadd_two_running_stats():
-    a = RunningStats()
+    a = RunningMeanVar()
     a.n = 3
     a.M1 = 2.0
     a.M2 = 0.8
 
-    b = RunningStats()
+    b = RunningMeanVar()
     b.n = 8
     b.M1 = -3.0
     b.M2 = 4.4
