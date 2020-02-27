@@ -3,7 +3,7 @@ name: Build
 on: 
   push:
     branches-ignore:
-      - masterr
+      - master
   pull_request:
     branches:
       - "*"
@@ -27,7 +27,7 @@ jobs:
         run: make lint-no-fail
       - name: Test with pytest
         run: make test-w-coverage
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.github_token }}
+        #       - name: Coveralls
+        #         uses: coverallsapp/github-action@master
+        #         with:
+        #           github-token: ${{ secrets.github_token }}

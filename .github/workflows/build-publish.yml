@@ -28,10 +28,10 @@ jobs:
         run: make lint-syntax-errors
       - name: Test with pytest
         run: make test-cov
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.github_token }}
+        #      - name: Coveralls
+        #        uses: coverallsapp/github-action@master
+        #        with:
+        #          github-token: ${{ secrets.github_token }}
   publish:
     needs: build
     runs-on: ubuntu-latest
