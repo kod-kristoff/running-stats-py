@@ -27,7 +27,7 @@ jobs:
       - name: Lint with flake8 for syntax errors
         run: make lint-syntax-errors
       - name: Test with pytest
-        run: make test-cov
+        run: make test-w-coverage
         #      - name: Coveralls
         #        uses: coverallsapp/github-action@master
         #        with:
