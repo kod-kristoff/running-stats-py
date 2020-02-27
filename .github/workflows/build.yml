@@ -1,6 +1,12 @@
 name: Build
 
-on: [push]
+on: 
+  push:
+    branches-ignore:
+      - masterr
+  pull_request:
+    branches:
+      - "*"
 
 jobs:
   build:
@@ -15,58 +21,13 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/cache@v1
-        name: Look for cached dependencies
-        id: cache-pip
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}-${{ hashFiles('**/requirements.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ hashFiles('**/setup.cfg') }}-
-            ${{ runner.os }}-pip-
       - name: Install dependencies
-        # if: steps.cache-pip.outputs.cache-hit != 'true'
         run: make install-test
       - name: Lint with pylint
         run: make lint-no-fail
-      - name: Typecheck
-        if: matrix.python-version != '3.8'
-        run: |
-          pip install pytype
-          pytype      
       - name: Test with pytest
         run: make test-w-coverage
-            #pytest -vv --cov=running_stats --cov-report=term tests
-      # - name: Coveralls
-      #   uses: coverallsapp/github-action@master
-      #   with:
-      #     github-token: ${{ secrets.github_token }}
-      #   publish:
-      #     needs: build
-      #     runs-on: ubuntu-latest
-      #     steps:
-      #       - uses: actions/checkout@v1
-      #       - name: Set up Python 3.6
-      #         uses: actions/setup-python@v1
-      #         with:
-      #           python-version: 3.6
-      #       - name: Build distribution
-      #         run: |
-      #           pip install --upgrade setuptools twine wheel pbr
-      #           python setup.py sdist bdist_wheel
-      #           echo "github.ref = ${{ github.ref }}"
-      #       - name: Check distributions
-      #         run: twine check dist/*
-      #       - name: Publish package to TestPyPI
-      #         uses: pypa/gh-action-pypi-publish@master
-      #         if: github.repository == 'kod-kristoff/running-stats-py' && !startsWith(github.ref, 'refs/tags')
-      #         with:
-      #           user: __token__
-      #           password: ${{ secrets.test_pypi_password }}
-      #           repository_url: https://test.pypi.org/legacy/
-      #       - name: Publish package to PyPI
-      #         uses: pypa/gh-action-pypi-publish@master
-      #         if: github.repository == 'kod-kristoff/running-stats-py' && startsWith(github.ref, 'refs/tags')
-      #         with:
-      #           user: __token__
-      #           password: ${{ secrets.pypi_password }}
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.github_token }}
