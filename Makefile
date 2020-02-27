@@ -59,6 +59,9 @@ lint: install-test
 lint-no-fail: install-test
 	${INVENV} pylint --rcfile .pylintrc --exit-zero running_stats tests
 
+lint-syntax-errors: install-dev
+	${INVENV} flake8 karp5_sb tests setup.py run.py cli.py --count --select=E9,F63,F7,F82 --show-source --statistics ${FLAKE8_FLAGS}
+		
 clean: clean-pyc
 clean-pyc:
 	find . -name '*.pyc' -exec rm --force {} \;
