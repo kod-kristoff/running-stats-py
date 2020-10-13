@@ -29,7 +29,7 @@ jobs:
       - name: Test with pytest
         run: make test-w-coverage
       - name: upload coverage
-        uses: paambaati/codeclimate-action@2.7.4
+        uses: paambaati/codeclimate-action@v2.7.4
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         #      - name: Coveralls
