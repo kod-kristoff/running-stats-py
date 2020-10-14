@@ -16,6 +16,7 @@ venv3
 .coverage
 .pytest_cache/
 .hypothesis/
+coverage.xml
 
 # environment #
 ###############
