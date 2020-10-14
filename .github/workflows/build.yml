@@ -8,6 +8,9 @@ on:
     branches:
       - "*"
 
+env:
+  CC_TEST_REPORTER_URL: https://codeclimate.com/downloads/test-reporter/test-reporter-0.7.0-linux-amd64
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -17,24 +20,91 @@ jobs:
         python-version: [3.6, 3.7, 3.8]
     steps:
       - uses: actions/checkout@v1
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: make install-test
+
       - name: Lint with pylint
         run: make lint-no-fail
+
       - name: Test with pytest
         run: make test-w-coverage
-      - name: upload coverage
-        uses: paambaati/codeclimate-action@v2.7.4
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+      - name: Set ENV for codeclimate (pull_request)
+        run: |
+          git fetch --no-tags --prune --depth=1 origin +refs/heads/$GITHUB_HEAD_REF:refs/remotes/origin/$GITHUB_HEAD_REF
+          echo "::set-env name=GIT_BRANCH::$GITHUB_HEAD_REF"
+          echo "::set-env name=GIT_COMMIT_SHA::$(git rev-parse origin/$GITHUB_HEAD_REF)"
+        if: github.event_name == 'pull_request'
+
+      - name: Set ENV for codeclimate (push)
+        run: |
+          echo "::set-env name=GIT_BRANCH::$GITHUB_REF"
+          echo "::set-env name=GIT_COMMIT_SHA::$GITHUB_SHA"
+        if: github.event_name == 'push'
+
+      - name: Download test coverage reporter
+        run: curl -L $CC_TEST_REPORTER_URL > cc-test-reporter
+
+      - name: Give test coverage reporter executable permissions
+        run: chmod +x cc-test-reporter
+
+      - name: Save coverage
+        run: ./cc-test-reporter format-coverage --output coverage/codeclimate.${{ matrix.python-version }}.json
+
+      - uses: actions/upload-artifact@v1
         with:
-          coverageLocations: ${{ github.workspace }}/.coverage:coverage.py
-          coverageCommand: make test-w-coverage
-        #       - name: Coveralls
-        #         uses: coverallsapp/github-action@master
-        #         with:
-        #           github-token: ${{ secrets.github_token }}
+          name: coverage-${{ matrix.python-version }}
+          path: coverage/codeclimate.${{ matrix.python-version }}.json
+
+      # - name: upload coverage
+      #   uses: paambaati/codeclimate-action@v2.7.4
+      #   env:
+      #     CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      #   with:
+      #     coverageLocations: ${{ github.workspace }}/.coverage:coverage.py
+      #     coverageCommand: make test-w-coverage
+      #       - name: Coveralls
+      #         uses: coverallsapp/github-action@master
+      #         with:
+      #           github-token: ${{ secrets.github_token }}
+
+  upload_coverage:
+    runs-on: ubuntu-latest
+
+    env:
+      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+    needs: test
+
+    steps:
+      - name: Download test coverage reporter
+        run: curl -L $CC_TEST_REPORTER_URL > cc-test-reporter
+
+      - name: Give test coverage reporter executable permissions
+        run: chmod +x cc-test-reporter
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: coverage-3.6
+          path: coverage
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: coverage-3.7
+          path: coverage
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: coverage-3.8
+          path: coverage
+
+      - name: Aggregate & upload results to Code Climate
+        run: |
+          ./cc-test-reporter sum-coverage coverage/codeclimate.*.json
+          ./cc-test-reporter upload-coverage
