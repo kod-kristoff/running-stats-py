@@ -55,7 +55,7 @@ jobs:
         run: chmod +x cc-test-reporter
 
       - name: Save coverage
-        run: ./cc-test-reporter format-coverage .coverage -t coverage.py --output coverage/codeclimate.${{ matrix.python-version }}.json
+        run: ./cc-test-reporter format-coverage coverage.xml -t coverage.py --output coverage/codeclimate.${{ matrix.python-version }}.json
 
       - uses: actions/upload-artifact@v1
         with:
