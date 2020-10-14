@@ -33,6 +33,7 @@ jobs:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
           coverageLocations: ${{ github.workspace }}/.coverage:coverage.py
+          coverageCommand: make test-w-coverage
         #       - name: Coveralls
         #         uses: coverallsapp/github-action@master
         #         with:
