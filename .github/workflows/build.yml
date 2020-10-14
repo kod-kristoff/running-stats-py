@@ -1,6 +1,6 @@
 name: Build
 
-on: 
+on:
   push:
     branches-ignore:
       - master
@@ -31,6 +31,8 @@ jobs:
         uses: paambaati/codeclimate-action@v2.7.4
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageLocations: ${{ github.workspace }}/.coverage:coverage.py
         #       - name: Coveralls
         #         uses: coverallsapp/github-action@master
         #         with:
