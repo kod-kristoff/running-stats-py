@@ -12,7 +12,7 @@ env:
   CC_TEST_REPORTER_URL: https://codeclimate.com/downloads/test-reporter/test-reporter-0.7.0-linux-amd64
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
