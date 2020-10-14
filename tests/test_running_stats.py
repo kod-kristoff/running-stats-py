@@ -1,38 +1,38 @@
 import math
+from typing import List
 from unittest import mock
 
 import pytest
 
-from running_stats.running_stats import RunningStats
+from running_stats.running_stats import RunningMeanVar
 
 
-@pytest.fixture
-def rs_empty():
-    return RunningStats()
+@pytest.fixture(name="rs_empty")
+def fixture_rs_empty():
+    return RunningMeanVar()
 
 
-@pytest.fixture
-def rs_one_value(rs_empty):
+@pytest.fixture(name="rs_one_value")
+def fixture_rs_one_value(rs_empty):
     rs_empty.push(4.0)
     return rs_empty
 
 
-@pytest.fixture
-def rs_two_values(rs_one_value):
+@pytest.fixture(name="rs_two_values")
+def fixture_rs_two_values(rs_one_value):
     rs_one_value.push(6.0)
     return rs_one_value
 
 
-@pytest.fixture
-def rs_three_values(rs_two_values):
+@pytest.fixture(name="rs_three_values")
+def fixture_rs_three_values(rs_two_values):
     rs_two_values.push(2.0)
     return rs_two_values
 
 
-@pytest.fixture
-def value_list():
-    values = [2.0, 1.0, -3.0, -1.0]
-    return values
+@pytest.fixture(name="value_list")
+def fixture_value_list() -> List[float]:
+    return [2.0, 1.0, -3.0, -1.0]
 
 
 def test_initial_values(rs_empty):
@@ -44,7 +44,7 @@ def test_initial_values(rs_empty):
 
 @pytest.mark.parametrize("var", [0.0, 2.0, 4.0, 5.0])
 def test_standard_deviation(var):
-    rs = RunningStats()
+    rs = RunningMeanVar()
     rs.variance = mock.Mock()
     rs.variance.return_value = var
     assert rs.standard_deviation() == math.sqrt(var)
@@ -84,7 +84,7 @@ def test_variance_three_values(rs_three_values):
 
 
 def test_push_iter_with_list(value_list):
-    rs = RunningStats()
+    rs = RunningMeanVar()
     rs.push_iter(value_list)
     assert rs.n == len(value_list)
     assert rs.mean() == -0.25
@@ -92,34 +92,34 @@ def test_push_iter_with_list(value_list):
 
 
 def test_add_two_running_stats():
-    a = RunningStats()
+    a = RunningMeanVar()
     a.n = 3
     a.M1 = 2.0
     a.M2 = 7.8
 
-    b = RunningStats()
+    b = RunningMeanVar()
     b.n = 6
     b.M1 = 6.0
     b.M2 = 3.4
 
     c = a + b
     assert c.n == a.n + b.n
-    assert c.M1 == 42.0/9
+    assert c.M1 == 42.0 / 9
     assert c.M2 == 43.2
 
 
 def test_iadd_two_running_stats():
-    a = RunningStats()
+    a = RunningMeanVar()
     a.n = 3
     a.M1 = 2.0
     a.M2 = 0.8
 
-    b = RunningStats()
+    b = RunningMeanVar()
     b.n = 8
     b.M1 = -3.0
     b.M2 = 4.4
 
     a += b
     assert a.n == 11
-    assert a.M1 == -18.0/11
+    assert a.M1 == -18.0 / 11
     assert a.M2 == 5.2 + 25.0 * 24 / 11

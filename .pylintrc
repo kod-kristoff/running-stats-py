@@ -267,7 +267,15 @@ good-names=i,
            e,
            es,
            op,
-           q
+           q,
+           rs,
+           a,
+           b,
+           c,
+           n,
+           M1,
+           M2,
+           M3
 
 # Include a hint for the correct naming format with invalid-name.
 include-naming-hint=no

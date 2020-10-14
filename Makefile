@@ -51,7 +51,7 @@ test: install-test clean-pyc
 	${INVENV} pytest -vv tests/
 
 test-w-coverage: install-test clean-pyc
-	${INVENV} pytest -vv --cov-config=setup.cfg --cov=running_stats --cov-report=term-missing tests
+	${INVENV} pytest -vv --cov-config=setup.cfg --cov=running_stats --cov-report=xml tests
 
 lint: install-test
 	${INVENV} pylint --rcfile .pylintrc running_stats tests
@@ -61,7 +61,7 @@ lint-no-fail: install-test
 
 lint-syntax-errors: install-dev
 	${INVENV} flake8 karp5_sb tests setup.py run.py cli.py --count --select=E9,F63,F7,F82 --show-source --statistics ${FLAKE8_FLAGS}
-		
+
 clean: clean-pyc
 clean-pyc:
 	find . -name '*.pyc' -exec rm --force {} \;
