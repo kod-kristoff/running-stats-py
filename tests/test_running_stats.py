@@ -1,38 +1,38 @@
 import math
+from typing import List
 from unittest import mock
 
 import pytest
 
-from running_stats.running_mean_var import RunningMeanVar
+from running_stats.running_stats import RunningMeanVar
 
 
-@pytest.fixture
-def rs_empty():
+@pytest.fixture(name="rs_empty")
+def fixture_rs_empty():
     return RunningMeanVar()
 
 
-@pytest.fixture
-def rs_one_value(rs_empty):
+@pytest.fixture(name="rs_one_value")
+def fixture_rs_one_value(rs_empty):
     rs_empty.push(4.0)
     return rs_empty
 
 
-@pytest.fixture
-def rs_two_values(rs_one_value):
+@pytest.fixture(name="rs_two_values")
+def fixture_rs_two_values(rs_one_value):
     rs_one_value.push(6.0)
     return rs_one_value
 
 
-@pytest.fixture
-def rs_three_values(rs_two_values):
+@pytest.fixture(name="rs_three_values")
+def fixture_rs_three_values(rs_two_values):
     rs_two_values.push(2.0)
     return rs_two_values
 
 
-@pytest.fixture
-def value_list():
-    values = [2.0, 1.0, -3.0, -1.0]
-    return values
+@pytest.fixture(name="value_list")
+def fixture_value_list() -> List[float]:
+    return [2.0, 1.0, -3.0, -1.0]
 
 
 def test_initial_values(rs_empty):
@@ -104,7 +104,7 @@ def test_add_two_running_stats():
 
     c = a + b
     assert c.n == a.n + b.n
-    assert c.M1 == 42.0/9
+    assert c.M1 == 42.0 / 9
     assert c.M2 == 43.2
 
 
@@ -121,5 +121,5 @@ def test_iadd_two_running_stats():
 
     a += b
     assert a.n == 11
-    assert a.M1 == -18.0/11
+    assert a.M1 == -18.0 / 11
     assert a.M2 == 5.2 + 25.0 * 24 / 11
