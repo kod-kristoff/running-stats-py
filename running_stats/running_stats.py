@@ -60,6 +60,8 @@ class RunningStats(RunningMeanVar):
         self.num_values += 1
         delta = x - self.M1
         delta_n = delta / self.num_values
+        delta_n2 = delta_n * delta_n
         term1 = delta * delta_n * n_1
         self.M1 += delta_n
+        self.M4 += term1 * delta_n2 * (self.num_values*self.num_values - 3*self.num_values + 3) + 6 * delta_n2 * self.M2 - 4 * delta_n * self.M3
         self.M2 += term1
