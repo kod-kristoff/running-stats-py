@@ -107,17 +107,17 @@ jobs:
       - name: Give test coverage reporter executable permissions
         run: chmod +x cc-test-reporter
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: coverage-3.6
           path: coverage
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: coverage-3.7
           path: coverage
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: coverage-3.8
           path: coverage
