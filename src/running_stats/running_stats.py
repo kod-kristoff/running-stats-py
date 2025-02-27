@@ -62,7 +62,7 @@ class RunningMeanVar:
 
 @define
 class RunningStats(RunningMeanVar):
-    """Compute mean, varaiance, skewness and kurtosis."""
+    """Compute mean, variance, skewness and kurtosis."""
 
     M3: float = 0.0
     M4: float = 0.0
