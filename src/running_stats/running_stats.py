@@ -3,10 +3,10 @@
 import math
 import typing
 
-import attr
+from attrs import define
 
 
-@attr.s(auto_attribs=True)
+@define
 class RunningMeanVar:
     """Compute mean and variance."""
 
@@ -29,7 +29,7 @@ class RunningMeanVar:
         self.M1 += delta / self.num_values
         self.M2 += delta * (x - self.M1)
 
-    def push_iter(self, values: typing.Iterable[float]):
+    def push_iter(self, values: typing.Iterable[float]) -> None:
         """Add values from an Iterable."""
         for value in values:
             self.push(value)
@@ -46,7 +46,8 @@ class RunningMeanVar:
         """Compute the sample standard deviation."""
         return math.sqrt(self.variance())
 
-    def __add__(self, other):
+    def __add__(self, other: "RunningMeanVar") -> "RunningMeanVar":
+        """Combine 2 RunningMeanVar instances."""
         combined = RunningMeanVar()
         combined.num_values = self.num_values + other.num_values
 
@@ -59,12 +60,15 @@ class RunningMeanVar:
         return combined
 
 
-@attr.s(auto_attribs=True)
+@define
 class RunningStats(RunningMeanVar):
+    """Compute mean, varaiance, skewness and kurtosis."""
+
     M3: float = 0.0
     M4: float = 0.0
 
     def push(self, x: float) -> None:
+        """Add a value."""
         n_1 = self.num_values
         self.num_values += 1
         delta = x - self.M1
