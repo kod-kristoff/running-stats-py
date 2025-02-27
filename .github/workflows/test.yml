@@ -80,6 +80,16 @@ jobs:
           name: coverage-${{ matrix.python-version }}
           path: coverage/codeclimate.${{ matrix.python-version }}.json
 
+      - name: convert coverage data to lcov
+        run: |
+          ls
+          uv run coverage lcov -o reports/lcov.info
+
+      - uses: qltysh/qlty-action/coverage@main
+        with:
+          coverage-token: ${{ secrets.QLTY_COVERAGE_TOKEN }}
+          files: reports/lcov.info
+
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
