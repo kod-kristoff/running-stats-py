@@ -17,7 +17,6 @@ permissions:
 env:
   MINIMUM_PYTHON_VERSION: "3.9"
   UV_VERSION: "0.5.15"
-  CC_TEST_REPORTER_VERSION: "0.11.1"
 
 jobs:
   coverage:
@@ -63,22 +62,8 @@ jobs:
       - name: Install dependencies
         run: make install-dev
 
-      - name: Download codeclimate coverage reporter
-        run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-${{ env.CC_TEST_REPORTER_VERSION }}-linux-amd64 > cc-test-reporter
-
-      - name: Give test coverage reporter executable permissions
-        run: chmod +x cc-test-reporter
-
       - name: Run tests for coverage
         run: make test-w-coverage cov_report=xml
-
-      - name: Save coverage
-        run: ./cc-test-reporter format-coverage coverage.xml -t coverage.py --output coverage/codeclimate.${{ matrix.python-version }}.json
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: coverage-${{ matrix.python-version }}
-          path: coverage/codeclimate.${{ matrix.python-version }}.json
 
       - name: convert coverage data to lcov
         run: |
@@ -204,48 +189,3 @@ jobs:
         uses: re-actors/alls-green@release/v1
         with:
           jobs: ${{ toJSON(needs) }}
-
-  upload_coverage:
-    runs-on: ubuntu-latest
-
-    env:
-      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
-
-    needs: coverage
-
-    steps:
-      - name: Download test coverage reporter
-        run: curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-${{ env.CC_TEST_REPORTER_VERSION }}-linux-amd64 > cc-test-reporter
-
-      - name: Give test coverage reporter executable permissions
-        run: chmod +x cc-test-reporter
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-3.9
-          path: coverage
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-3.10
-          path: coverage
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-3.11
-          path: coverage
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-3.12
-          path: coverage
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: coverage-3.13
-          path: coverage
-
-      - name: Aggregate & upload results to Code Climate
-        run: |
-          ./cc-test-reporter sum-coverage coverage/codeclimate.*.json
-          ./cc-test-reporter upload-coverage

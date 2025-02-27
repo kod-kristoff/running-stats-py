@@ -1,7 +1,6 @@
 from typing import Union
 
 import pytest
-
 from running_stats.running_stats import RunningMeanVar, RunningStats
 
 
