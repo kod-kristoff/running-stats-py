@@ -26,7 +26,7 @@ To later merge updates to this repo, just run:
 
 ```shell
 git fetch ci
-get merge ci/main
+git merge ci/main
 ```
 
 This setup is inspired by <https://github.com/jonhoo/rust-ci-conf>.
