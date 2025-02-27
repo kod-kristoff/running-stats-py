@@ -103,3 +103,5 @@ Thumbs.db
 ###################
 .vscode/
 tmp/
+
+.python-version

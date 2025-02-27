@@ -1,65 +1,168 @@
-.PHONY: test clean clean-pyc lint lint-no-fail test-w-coverage
 
-.DEFAULT: test
+# use this Makefile as base in your project by running
+# git remote add make https://github.com/spraakbanken/python-uv-make-conf
+# git fetch make
+# git merge --allow-unrelated-histories make/main
+#
+# To later update this makefile:
+# git fetch make
+# git merge make/main
+#
+.default: help
 
-PYTHON = python3
-PLATFORM := ${shell uname -o}
-INVENV_PATH = ${shell which invenv}
+.PHONY: help
+help:
+	@echo "usage:"
+	@echo "dev | install-dev"
+	@echo "   setup development environment"
+	@echo "install"
+	@echo "   setup production environment"
+	@echo ""
+	@echo "info"
+	@echo "   print info about the system and project"
+	@echo ""
+	@echo "test"
+	@echo "   run all tests"
+	@echo ""
+	@echo "test-w-coverage [cov=] [cov_report=]"
+	@echo "   run all tests with coverage collection. (Default: cov_report='term-missing', cov='--cov=${PROJECT_SRC}')"
+	@echo ""
+	@echo "lint"
+	@echo "   lint the code"
+	@echo ""
+	@echo "lint-fix"
+	@echo "   lint the code and try to fix it"
+	@echo ""
+	@echo "type-check"
+	@echo "   check types"
+	@echo ""
+	@echo "fmt"
+	@echo "   format the code"
+	@echo ""
+	@echo "check-fmt"
+	@echo "   check that the code is formatted"
+	@echo ""
+	@echo "bumpversion [part=]"
+	@echo "   bumps the given part of the version of the project. (Default: part='patch')"
+	@echo ""
+	@echo "bumpversion-show"
+	@echo "   shows the bump path that is possible"
+	@echo ""
+	@echo "publish [branch=]"
+	@echo "   pushes the given branch including tags to origin, for CI to publish based on tags. (Default: branch='main')"
+	@echo "   Typically used after 'make bumpversion'"
+	@echo ""
+	@echo "prepare-release"
+	@echo "   run tasks to prepare a release"
+	@echo ""
 
-${info Platform: ${PLATFORM}}
-${info invenv: ${INVENV_PATH}}
+PLATFORM := `uname -o`
+REPO := running-stats-py
+PROJECT_SRC := src/running_stats
 
 ifeq (${VIRTUAL_ENV},)
   VENV_NAME = .venv
+  INVENV = uv run
 else
   VENV_NAME = ${VIRTUAL_ENV}
-endif
-${info Using ${VENV_NAME}}
-
-VENV_BIN = ${VENV_NAME}/bin
-
-ifeq (${INVENV_PATH},)
-  INVENV = export VIRTUAL_ENV="${VENV_NAME}"; export PATH="${VENV_BIN}:${PATH}"; unset PYTHON_HOME;
-else
-  INVENV = invenv -C ${VENV_NAME}
+  INVENV =
 endif
 
-venv: ${VENV_NAME}/made
+default_cov := "--cov=${PROJECT_SRC}"
+cov_report := "term-missing"
+cov := ${default_cov}
 
-install: venv ${VENV_NAME}/req.installed
-install-test: venv install ${VENV_NAME}/req-test.installed
-install-dev: venv install-test ${VENV_NAME}/req-dev.installed
+all_tests := tests
+tests := tests
 
-${VENV_NAME}/made:
-	test -d ${VENV_NAME} || ${PYTHON} -m venv ${VENV_NAME}
-	${INVENV} pip install --upgrade pip
-	@touch $@
+info:
+	@echo "Platform: ${PLATFORM}"
+	@echo "INVENV: '${INVENV}'"
 
-${VENV_NAME}/req.installed: requirements.txt
-	${INVENV} pip install -Ur $<
-	@touch $@
+dev: install-dev
 
-${VENV_NAME}/req-test.installed: setup.py setup.cfg
-	${INVENV} pip install -e .[test]
-	@touch $@
+# setup development environment
+install-dev:
+	uv sync --all-packages --dev
 
-${VENV_NAME}/req-dev.installed: setup.py setup.cfg
-	${INVENV} pip install -e .[dev]
-	@touch $@
+# setup production environment
+install:
+	uv sync --all-packages --no-dev
 
-test: install-test clean-pyc
-	${INVENV} pytest -vv tests/
+lock: uv.lock
 
-test-w-coverage: install-test clean-pyc
-	${INVENV} pytest -vv --cov-config=setup.cfg --cov=running_stats --cov-report=xml tests
+uv.lock: pyproject.toml
+	uv lock
 
-lint: install-test
-	${INVENV} pylint --rcfile .pylintrc running_stats tests
+.PHONY: test
+test:
+	${INVENV} pytest -vv ${tests}
 
-lint-no-fail: install-test
-	${INVENV} pylint --rcfile .pylintrc --exit-zero running_stats tests
+.PHONY: test-w-coverage
+# run all tests with coverage collection
+test-w-coverage:
+	${INVENV} pytest -vv ${cov}  --cov-report=${cov_report} ${all_tests}
 
-clean: clean-pyc
-clean-pyc:
-	find . -name '*.pyc' -exec rm --force {} \;
+.PHONY: doc-tests
+doc-tests:
+	${INVENV} pytest ${cov} --cov-report=${cov_report} --doctest-modules ${PROJECT_SRC}
 
+.PHONY: type-check
+# check types
+type-check:
+	${INVENV} mypy ${PROJECT_SRC} ${tests}
+
+.PHONY: lint
+# lint the code
+lint:
+	${INVENV} ruff check ${PROJECT_SRC} ${tests}
+
+.PHONY: lint-fix
+# lint the code (and fix if possible)
+lint-fix:
+	${INVENV} ruff check --fix ${PROJECT_SRC} ${tests}
+
+part := "patch"
+bumpversion:
+	${INVENV} bump-my-version bump ${part}
+
+bumpversion-show:
+	${INVENV} bump-my-version show-bump
+
+# run formatter(s)
+fmt:
+	${INVENV} ruff format ${PROJECT_SRC} ${tests}
+
+.PHONY: check-fmt
+# check formatting
+check-fmt:
+	${INVENV} ruff format --check ${PROJECT_SRC} ${tests}
+
+build:
+	uvx --from build pyproject-build --installer uv
+
+branch := "main"
+publish:
+	git push -u origin ${branch} --tags
+
+
+.PHONY: prepare-release
+prepare-release: update-changelog tests/requirements-testing.lock
+
+# we use lock extension so that dependabot doesn't pick up changes in this file
+tests/requirements-testing.lock: pyproject.toml
+	uv export --dev --format requirements-txt --no-hashes --no-emit-project --output-file $@
+
+.PHONY: update-changelog
+update-changelog: CHANGELOG.md
+
+.PHONY: CHANGELOG.md
+CHANGELOG.md:
+	git cliff --unreleased --prepend $@
+
+# update snapshots for `syrupy`
+.PHONY: snapshot-update
+snapshot-update:
+	${INVENV} pytest --snapshot-update
+
+### === project targets below this line ===
