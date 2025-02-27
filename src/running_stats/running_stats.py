@@ -1,4 +1,5 @@
 """Compute mean and variance."""
+
 import math
 import typing
 
@@ -7,18 +8,26 @@ import attr
 
 @attr.s(auto_attribs=True)
 class RunningMeanVar:
-    """Compute mean and variance.
-    """
+    """Compute mean and variance."""
+
     num_values: int = 0
     M1: float = 0.0
     M2: float = 0.0
 
-    def push(self, value: float) -> None:
-        """Add a value."""
+    def push(self, x: float) -> None:
+        """Add a value.
+
+        Examples:
+        >>> rmv = RunningMeanVar()
+        >>> rmv.push(2.0)
+        >>> rmv.push(3.0)
+        >>> rmv.mean()
+        2.5
+        """
         self.num_values += 1
-        delta = value - self.M1
-        self.M1 += delta/self.num_values
-        self.M2 += delta * (value - self.M1)
+        delta = x - self.M1
+        self.M1 += delta / self.num_values
+        self.M2 += delta * (x - self.M1)
 
     def push_iter(self, values: typing.Iterable[float]):
         """Add values from an Iterable."""
@@ -31,7 +40,7 @@ class RunningMeanVar:
 
     def variance(self) -> float:
         """Compute the sample variance."""
-        return self.M2/(self.num_values - 1) if self.num_values > 1 else 0.0
+        return self.M2 / (self.num_values - 1) if self.num_values > 1 else 0.0
 
     def standard_deviation(self) -> float:
         """Compute the sample standard deviation."""
@@ -44,7 +53,7 @@ class RunningMeanVar:
         delta = other.M1 - self.M1
         delta2 = delta * delta
 
-        combined.M1 = (self.M1 * self.num_values + other.M1 * other.num_values)/combined.num_values
+        combined.M1 = (self.M1 * self.num_values + other.M1 * other.num_values) / combined.num_values
         combined.M2 = self.M2 + other.M2 + delta2 * self.num_values * other.num_values / combined.num_values
 
         return combined
@@ -63,5 +72,9 @@ class RunningStats(RunningMeanVar):
         delta_n2 = delta_n * delta_n
         term1 = delta * delta_n * n_1
         self.M1 += delta_n
-        self.M4 += term1 * delta_n2 * (self.num_values*self.num_values - 3*self.num_values + 3) + 6 * delta_n2 * self.M2 - 4 * delta_n * self.M3
+        self.M4 += (
+            term1 * delta_n2 * (self.num_values * self.num_values - 3 * self.num_values + 3)
+            + 6 * delta_n2 * self.M2
+            - 4 * delta_n * self.M3
+        )
         self.M2 += term1
