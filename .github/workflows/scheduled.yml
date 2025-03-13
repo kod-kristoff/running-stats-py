@@ -81,7 +81,7 @@ jobs:
         if: hashFiles('uv.lock') != ''
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
 
       - name: uv sync --dev --upgrade
         if: hashFiles('uv.lock') != ''
