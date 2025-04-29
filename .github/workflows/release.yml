@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
@@ -17,7 +18,7 @@ permissions:
 
 env:
   MINIMUM_PYTHON_VERSION: "3.9"
-  UV_VERSION: "0.5.15"
+  UV_VERSION: "0.6.17"
 
 jobs:
   build:
@@ -47,7 +48,7 @@ jobs:
       #  -----  setup uv and load cache   -----
       #----------------------------------------------
       - name: Set up uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v6
         with:
           version: ${{ env.UV_VERSION }}
           enable-cache: true
